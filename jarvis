@@ -1,0 +1,351 @@
+import pyautogui
+import pyttsx3 #to convert your all speaking into a text
+import speech_recognition as sr #to reconnize speech
+import pywhatkit #to open youtube
+import pyjokes #to get some jokes
+import wikipedia
+import datetime #for current time
+from playsound import playsound
+import webbrowser #to any website
+import os  #to open file loaction we use os
+import random
+from win32com.client import Dispatch
+import requests
+import time
+from bs4 import BeautifulSoup
+import cv2
+from googletrans import Translator
+import subprocess as sp
+
+
+print("hey user! you can this alexa to \n1: alexa play music\n2: \"alexa wikipedia of\" some person or \"who is\" some person\n3: alexa open youtube\n4: alexa open gmail\n5: alexa open googgle\n6: send whatsaap message\n7: alexa game\n8: alexa jokes\n9: alexa what is the time\n10: alexa what is your name\n11: alexa what is my name\n12: alexa stop(to end)")
+listener=sr.Recognizer()
+engine=pyttsx3.init() #intialalizing pyttsx3
+try:
+    def talk(text):
+        engine.say(text) #to speak
+        engine.runAndWait() #to wait for user to speak
+
+    hour = datetime.datetime.now().hour
+
+    Windows_Speak = Dispatch('SAPI.Spvoice')
+
+    Windows_Speak.Rate = 2
+     # to see the current hour based on that wishing
+    if (hour > 0 and hour < 12):
+        rand_ans = ["good morning sir,this is alexa here, how may i help you",
+                    "HOLA, what can i do for you?"]
+        b = random.sample(rand_ans, k=1)
+        Windows_Speak.Speak(b)
+    elif(hour>=12 and hour<=15):
+        rand_ans = ["good afternoon sir,this is alexa here, how may i help you",
+                    "HOLA, what can i do for you?"]
+        b = random.sample(rand_ans, k=1)
+        Windows_Speak.Speak(b)
+    else:
+        rand_ans = ["good evening sir,this is alexa here, how may i help you",
+                    "HOLA, what can i do for you?"]
+        b = random.sample(rand_ans, k=1)
+        Windows_Speak.Speak(b)
+    def take_command():
+        try:
+            with sr.Microphone(device_index=0) as source: #triggers and open microphone
+                print("listening......")
+                listener.pause_threshold=1496.57047568
+                voice=listener.listen(source,timeout=5,phrase_time_limit=5)
+                command=listener.recognize_google(voice) #google speak engine is good so we use it
+                command=command.lower() #converting every text spoken into smaller case
+                if("alexa" in command ):
+                    command=command.replace("alexa","") #replacing alexa to print command
+                    print(command) #triggers only if alexa is there in speech
+        except:
+            pass
+        return command
+
+    def take_hindi():
+        try:
+            with sr.Microphone(device_index=0) as source: #triggers and open microphone
+                print("listening......")
+                listener.pause_threshold=1496.57047568
+                voice=listener.listen(source,timeout=5,phrase_time_limit=5)
+                command=listener.recognize_google(voice) #google speak engine is good so we use it
+                command=command.lower() #converting every text spoken into smaller case
+                if("alexa" in command ):
+                    command=command.replace("alexa","") #replacing alexa to print command
+                    print(command) #triggers only if alexa is there in speech
+        except:
+            pass
+        return command
+    def trans():
+        talk("tell me the lines")
+        line=take_hindi()
+        translate=Translator()
+        result = translate.translate(line)
+        Text=result.text
+        talk("TheTranslation for this Line is : "+Text)
+
+    def run_alexa():
+        command=take_command()
+        if("play" in command):
+            song=command.replace("play","")
+            talk("playing"+ song)
+            pywhatkit.playonyt(song)
+        elif("joke" in command):
+            talk(pyjokes.get_joke())
+
+
+        elif("wikipedia" in command or "who is" in command):
+            if("wikipedia" in command):
+                wiki=command.replace("wikipedia","")
+                info=wikipedia.summary(wiki,2)
+                print(info)
+                talk(f"according to wikipedia {info}")
+            elif "what is" in command or "who is" in command:
+                question = command
+                answer = computational_intelligence(question)
+                talk(answer)
+
+
+        elif("translate" in command):
+            trans()
+
+
+        elif("time" in command):
+            time=datetime.datetime.now().strftime("%I:%M %p") #%I is for 1-12 timings if i make %H then it will take from 1-24
+            #M is for minute and #S is for second that we dint add but still to know about it
+            #p is for knowing is it am or pm
+            talk(f"the current time is {time}")
+            print(time)
+
+        elif("stop" in command or "quit" in command or "you need a break" in command):
+            rand_ans =["okay  sir,it was a good time with you,bye bye",
+                        "Bye sir, You can wake me anytime"]
+            b = random.sample(rand_ans, k=1)
+            talk(b)
+            exit()
+
+        elif("how are you" in command):
+            rand_ans=["i a am very good sir, how about you","pleasure, you asked about it, i am very good, and hope your doing well"]
+            b=random.sample(rand_ans,k=1)
+            talk(f"{b}")
+        elif("like" in command):
+            talk("i just like myself and nothing else")
+        elif("what is your name" in command or "who are you" in command):
+            rand_ans=["i am someone ,who is bored by answering your question, anyways, i am alexa","i am your alexa, ready to help you all time, let me know if you need any help","you woked me up from sleep, for asking this, anyways i am alexa, but not a slave","i am cheap alexa, and i can do anything for you"]
+            b=random.sample(rand_ans,k=1)
+            talk(f"{b}")
+        elif("what is my name" in command):
+            talk("i am not very sure, but i had heard people calling you, the legend")
+            talk("and luckily we both are, talking")
+        elif("temperature" in command or "weather" in command):
+            if("current" in command):
+                op=command.replace("temperature","").replace("what is the current","")
+                url=f"https://www.google.com/search?q=what is the current temperature"
+                r=requests.get(url)
+                data=BeautifulSoup(r.text,"html.parser")
+                temp=data.find("div",class_="BNeawe").text
+                t=int(temp[:2])
+                if(t>28):
+                    talk(f"I Feel hot today, oh yah! because the current temperature is {temp}")
+                elif(t>19 and t>=28):
+                    talk(f"It is a warm day as the current temperature is {temp}")
+                elif(t<=19 and t>=-20):
+                    talk(f"its cold out sidd with {temp} , so better to stay under your blanket")
+            elif("weather" in command):
+                op=command.replace("weather in","").replace("what is the","")
+                url=f"https://www.google.com/search?q=what is the temperature in {op}"
+                r=requests.get(url)
+                data=BeautifulSoup(r.text,"html.parser")
+                temp=data.find("div",class_="BNeawe").text
+                t=int(temp[:2])
+                if(t>28):
+                    talk(f"I Feel hot today, oh yah! because it is {temp} in {op}")
+                elif(t>19 and t>=28):
+                    talk(f"It is a warm day as it is {temp} in {op}")
+                elif(t<=19 and t>=-20):
+                    talk(f"its cold out side with {temp} in {op}, so better to stay under your blanket")
+            elif ("temperature" in command):
+                op = command.replace("temperature in", "").replace("what is the", "")
+
+                url = f"https://www.google.com/search?q=what is the temperature in {op}"
+                r = requests.get(url)
+                data = BeautifulSoup(r.text, "html.parser")
+                temp = data.find("div", class_="BNeawe").text
+                t = int(temp[:2])
+                if (t > 28):
+                    talk(f"I Feel hot today, oh yah! because it is {temp} in {op}")
+                elif (t > 19 and t >= 28):
+                    talk(f"It is a warm day as it is {temp} in {op}")
+                elif (t <= 19 and t >= -20):
+                    talk(f"its cold out side with {temp} in {op}, so better to stay under your blanket")
+        elif("photo" in command or "turn on camera" in command or "switch on camera" in command or "camera" in command or "take my picture" in command or "click my photo" in command):
+            import subprocess as sp
+            if("turn on" in command or "switch on" in command):
+                sp.run('start microsoft.windows.camera:', shell=True)
+            elif("click" in command or "capture" in command):
+                import time
+                sp.run('start microsoft.windows.camera:', shell=True)
+                talk("say cheese sir")
+                pyautogui.click(x=801,y=366,duration=1)
+                pyautogui.moveTo(x=821,y=50)
+                time.sleep(1)
+                pyautogui.click(x=821,y=50)
+
+        elif("open youtube" in command):
+            op=command.replace("open","")
+            talk("opening"+ op)
+            webbrowser.open("youtube.com")
+        elif("open google" in command):
+            sp=command.replace("open","")
+            talk("opening"+sp)
+            webbrowser.open("google.com")
+        elif("open gmail" in command):
+            pp=command.replace("open","")
+            talk("opening"+pp)
+            webbrowser.open("gmail.com")
+        elif("open pycharm" in command):
+            address="C:\\Program Files\\JetBrains\\PyCharm Community Edition 2020.3\\bin\\pycharm64.exe"
+            talk("opening pycharm")
+            os.startfile(address)
+        elif("whatsapp" in command):
+            if("send a" in command):
+                op=command.replace("send a","").replace("whatsapp message to","")
+                talk(f"what message should i send to {op}")
+                print(op)
+                g=take_command()
+
+                import time
+                pyautogui.click(x=561,y=752)
+                time.sleep(3)
+                pyautogui.click(x=286,y=139)
+                pyautogui.write(op)
+                time.sleep(1)
+                pyautogui.click(x=294,y=273)
+                pyautogui.click(x=673,y=650)
+                pyautogui.write(g)
+                talk("message will be sent in 5 seconds")
+                time.sleep(5)
+                pyautogui.click(x=1159, y=648)
+                talk("message sent succesfully")
+                pyautogui.click(x=1083,y=42)
+            elif("send" in command):
+                op = command.replace("send", "").replace("whatsapp message to", "")
+                talk(f"what message should i send to {op}")
+                print(op)
+                g=take_command()
+
+                import time
+                pyautogui.click(x=561,y=752)
+                time.sleep(3)
+                pyautogui.click(x=286,y=139)
+                pyautogui.write(op)
+                time.sleep(1)
+                pyautogui.click(x=294,y=273)
+                pyautogui.click(x=673,y=650)
+                pyautogui.write(g)
+                talk("message will be sent in 5 seconds")
+                time.sleep(5)
+                pyautogui.click(x=1159, y=648)
+                talk("message sent succesfully")
+                pyautogui.click(x=1083,y=42)
+            elif("whatsapp" in command):
+                op = command.replace("whatsapp", "")
+                talk(f"what message should i send to {op}")
+                print(op)
+                g=take_command()
+
+                import time
+                pyautogui.click(x=561,y=752)
+                time.sleep(3)
+                pyautogui.click(x=286,y=139)
+                pyautogui.write(op)
+                time.sleep(1)
+                pyautogui.click(x=294,y=273)
+                pyautogui.click(x=673,y=650)
+                pyautogui.write(g)
+                talk("message will be sent in 5 seconds")
+                time.sleep(5)
+                pyautogui.click(x=1159, y=648)
+                talk("message sent succesfully")
+                pyautogui.click(x=1083,y=42)
+        elif("maths" in command):
+            talk("write ur numbers below")
+            a=eval(input("write here: "))
+            talk(f"your answer is {a}")
+            print(a)
+
+        elif(" game" in command):
+            talk("getting bored, its okay,lets play something")
+            talk("there are number from 1 to 10, and you have to guess")
+            talk("which one i was thinking of")
+
+            gm=random.randint(1,10)
+            talk("okay now guess you number")
+            user=int(input("guess your number"))
+            if(user==gm):
+                talk("congratulation sir, your born genius")
+                print("correct")
+            else:
+                talk("you lost, try your luck next time")
+                talk(f"the number was {gm}")
+                print(f"the actual number was {gm}")
+        elif("alarm" in command or "wake me" in command):
+            try:
+                rand_ans = ["what time should i wake you up", "when do you want to get up",
+                            "when should i keep alarm for"]
+                b = random.sample(rand_ans, k=1)
+                talk(b)
+                time=take_command()
+                time=time.replace("set alarm to","")
+                time=time.replace(".","")
+                time=time.upper()
+                import myalarm
+                myalarm.alarm(time)
+            except:
+                talk("I could not set can you tell that again")
+
+        elif("reminder" in command or "remind me" in command):
+            talk("after how much minute i should remind you sir")
+            a=int(input("enter minute you need to be reminder for\n"))
+            talk("on what should i remind you of")
+            b=input("need for reminder")
+            tme=datetime.datetime.now().minute
+            tme=tme+a
+            talk(f"reminder is set for next {a} minute")
+        elif("google search" in command or "what is" in command or "meaning" in command):
+            if("time" in command):
+                time = datetime.datetime.now().strftime(
+                    "%I:%M %p")  # %I is for 1-12 timings if i make %H then it will take from 1-24
+                # M is for minute and #S is for second that we dint add but still to know about it
+                # p is for knowing is it am or pm
+                talk(f"the current time is {time}")
+                print(time)
+
+
+            else:
+                import wikipedia as googleScrap
+                talk("this is what I found on the web")
+                try:
+                    sp = command.replace("google search", "")
+                    pywhatkit.search(sp)
+                    result=googleScrap.summary(sp,1)
+                    talk(result)
+                except:
+                    talk("could not search in web")
+
+        else:
+            rand_ans = ["sorry sir, i dint get you", "can you please say that again",
+                        "pardon please!"]
+            b = random.sample(rand_ans, k=1)
+            talk(b)
+
+    while True:
+        run_alexa()
+except:
+    Windows_Speak = Dispatch('SAPI.Spvoice')
+
+    Windows_Speak.Rate = 2
+    rand_ans = ["sorry you took too long to respond","i tried listening you,but i could not hear anything", "you wastsed my important 5 seconds, bye",
+                "pardon please!"]
+    b = random.sample(rand_ans, k=1)
+    Windows_Speak.Speak(b)
